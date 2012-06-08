@@ -6,8 +6,12 @@ External Browser Extractor Processor for heritrix3. Execute an external browser 
 Build: mvn -Dmaven.test.skip=false clean install
 Result: target/ExternalBrowserExtractorHTML-0.1.jar
 
-crawler-beans.cxml
+
+Configuration crawler-beans.cxml
+================================
+
 Define your extractor bean (You can put this near the settings for the other extractors: extractorHTML, extractorCSS, etc):
+
  <bean id="browserExtractorHtml" class="org.archive.modules.extractor.ExternalBrowserExtractorHtml" >
    <property name="executionString" value="/usr/local/bin/node /Users/accounts/Downloads/zombieBrowserExtractor/lib/zombieBrowserExtractor/zombieBrowserExtractor.js --userAgent _USERAGENT_ --url _URL_ > _OUTPUTFILEPATH_ 2>/dev/null"/>
    <property name="shouldBrowserReload" value="True" />
