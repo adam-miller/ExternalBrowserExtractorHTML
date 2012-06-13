@@ -254,8 +254,7 @@ public class ExternalBrowserExtractorHtml extends ExtractorHTML implements Initi
 					json = new JSONObject(line);
 				}
 				catch(JSONException e) {
-					logger.warning("Error parsing JSON line - Skipping: "+line);
-					e.printStackTrace();
+					logger.log(Level.WARNING, "Error parsing JSON line - Skipping: "+line, e);
 					continue;
 				}
 				try {
@@ -368,8 +367,7 @@ public class ExternalBrowserExtractorHtml extends ExtractorHTML implements Initi
 					}
 					
 				} catch (JSONException e) {
-					logger.warning("Error while reading JSON line - Skipping: "+line);
-					e.printStackTrace();
+					logger.log(Level.WARNING, "Error parsing JSON line - Skipping: "+line, e);
 				}
 
 			}
@@ -411,8 +409,7 @@ public class ExternalBrowserExtractorHtml extends ExtractorHTML implements Initi
 				String escapedJSON = preloadObject.toString().replaceAll("([^a-zA-Z0-9])", "\\\\$1");
 				fullExecString = fullExecString.replace("_PRELOADJSON_",escapedJSON);
 			} catch (Exception e) {
-				logger.warning("Error occured while trying to set pre-loaded content.");
-				e.printStackTrace();
+				logger.log(Level.WARNING, "Error occured while trying to set pre-loaded content.", e);
 			}
 		}	
 		
@@ -461,8 +458,7 @@ public class ExternalBrowserExtractorHtml extends ExtractorHTML implements Initi
 	        	response = IOUtils.toString(inStream);
 	        } 
 	        catch (IOException e) {
-	        	logger.warning("Error occured while reading command response.");
-    			e.printStackTrace();
+    			logger.log(Level.WARNING, "Error occured while reading command response.", e);
 	        }
 	        finally {
 	            IOUtils.closeQuietly(inStream); 
@@ -470,20 +466,19 @@ public class ExternalBrowserExtractorHtml extends ExtractorHTML implements Initi
 	        
 		}
 		catch (IOException e) {
-			logger.warning("Error occured while executing command. ExecStr: "+ executionString +" Error Description: " + e.getMessage());
-			e.printStackTrace();
+			logger.log(Level.WARNING, "Error occured while executing command. ExecStr: "+ executionString, e);
 		}
 
 		catch (InterruptedException e) {
-			logger.warning("Error occured while executing command. ExecStr: "+ executionString +" Error Description: " + e.getMessage());
-			e.printStackTrace();
+			logger.log(Level.WARNING, "Error occured while executing command. ExecStr: "+ executionString, e);
 		}
 
 		if(shellExitStatus!=0){
-			if(shellExitStatus==-5)
-				logger.warning("Command exceeded timeout: "+shellExitStatus);
+			if(shellExitStatus==-5){
+				logger.log(Level.WARNING, "Command exceeded timeout: "+shellExitStatus, executionString);
+			}
 			else{
-				logger.warning("Command returned status code: "+shellExitStatus);
+				logger.log(Level.WARNING, "Command returned status code: "+shellExitStatus, executionString);
 			}
 		}
 		return response;
