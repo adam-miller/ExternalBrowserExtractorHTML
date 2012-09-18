@@ -328,9 +328,9 @@ public class ExternalBrowserExtractorHtml extends ExtractorHTML implements Initi
 					
 					if ("XMLHttpRequest".equalsIgnoreCase(tag) && json.has("url")){
 						if(XHRAsEmbeds)
-							processEmbed(curi,json.getString("url"),LinkContext.EMBED_MISC.toString(),Hop.EMBED);
+							processEmbed(curi,json.getString("url"),"XMLHttpRequest/@url",Hop.EMBED);
 						else
-							processLink(curi,json.getString("url"),LinkContext.NAVLINK_MISC.toString());
+							processLink(curi,json.getString("url"),"XMLHttpRequest/@url".toString());
 					}
 					if("#comment".equalsIgnoreCase(tag) && json.has("value")){ // extracted comments get parsed via regex since they are not in the dom
 						String commentValue = json.getString("value");

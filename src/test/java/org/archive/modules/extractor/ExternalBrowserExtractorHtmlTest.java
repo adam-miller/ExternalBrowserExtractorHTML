@@ -23,7 +23,7 @@ import org.json.JSONObject;
 public class ExternalBrowserExtractorHtmlTest extends StringExtractorTestBase {
 
 	final public static String[] VALID_TEST_DATA = new String[] {
-		"{ \"tagName\": \"XMLHttpRequest\",\"url\": \"http://www.slashdot.org/\", \"hop\":\"EMBED\", \"context\":\"=EMBED_MISC\"}", //default embed
+		"{ \"tagName\": \"XMLHttpRequest\",\"url\": \"http://www.slashdot.org/\", \"hop\":\"EMBED\", \"context\":\"XMLHttpRequest/@url\"}", //default embed
 		"http://www.slashdot.org",
 		"{ \"tagName\": \"img\",\"src\": \"http://www.slashdot.org/\", \"hop\":\"EMBED\", \"context\":\"img/@src\"}", //img src
 		"http://www.slashdot.org",
@@ -45,7 +45,7 @@ public class ExternalBrowserExtractorHtmlTest extends StringExtractorTestBase {
 		"{ \"tagName\": \"link\",\"href\": \"http://www.slashdot.org/\", \"hop\":\"EMBED\", \"context\":\"link/@href\"}", //link href
 		"http://www.slashdot.org",
 		
-		"{ \"tagName\": \"XMLHttpRequest\",\"url\": \"http://www.slashdot.org/\", \"hop\":\"EMBED\", \"context\":\"=EMBED_MISC\"}", //XMLHttpRequest url
+		"{ \"tagName\": \"XMLHttpRequest\",\"url\": \"http://www.slashdot.org/\", \"hop\":\"EMBED\", \"context\":\"XMLHttpRequest/@url\"}", //XMLHttpRequest url
 		"http://www.slashdot.org",
 		
 		"{ \"tagName\": \"style\",\"innerText\": \"background: url('http://www.slashdot.org/');\", \"hop\":\"EMBED\", \"context\":\"=EMBED_MISC\"}", //style innerText
@@ -142,7 +142,7 @@ public class ExternalBrowserExtractorHtmlTest extends StringExtractorTestBase {
     	extractor.setReturnValue(content);
         extractor.process(euri);
         HashSet<Link> expected = new HashSet<Link>();
-        expected.add(new Link(src, UURIFactory.getInstance("http://www.slashdot.org"), new HTMLLinkContext("=NAVLINK_MISC"), Hop.valueOf("NAVLINK")));
+        expected.add(new Link(src, UURIFactory.getInstance("http://www.slashdot.org"), new HTMLLinkContext("XMLHttpRequest/@url"), Hop.valueOf("NAVLINK")));
         assertEquals(expected, euri.getOutLinks());
         assertNoSideEffects(euri);
 	}
