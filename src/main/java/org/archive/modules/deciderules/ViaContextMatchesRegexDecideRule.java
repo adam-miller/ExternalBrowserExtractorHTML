@@ -27,7 +27,10 @@ public class ViaContextMatchesRegexDecideRule extends MatchesRegexDecideRule {
     
     @Override
     protected String getString(CrawlURI uri) {
-        return uri.getViaContext().toString();
+    	if(uri.getViaContext()!=null)
+    		return uri.getViaContext().toString();
+    	else
+    		return "";
     }
 
 }
