@@ -13,7 +13,6 @@ import org.archive.modules.CrawlMetadata;
 import org.archive.modules.CrawlURI;
 import org.archive.modules.extractor.StringExtractorTestBase.TestData;
 import org.archive.modules.fetcher.UserAgentProvider;
-import org.archive.net.LaxURI;
 import org.archive.net.UURI;
 import org.archive.net.UURIFactory;
 import org.archive.util.Recorder;
@@ -123,7 +122,7 @@ public class ExternalBrowserExtractorHtmlTest extends StringExtractorTestBase {
 		MockExternalBrowserExtractorHtml extractor = (MockExternalBrowserExtractorHtml)makeExtractor();
 		String text = "{ \"blah\":\"value\" }";
     	extractor.setReturnValue(text);
-    	String returnValue = extractor.executeCommand("",null);
+    	String returnValue = extractor.executeCommand("");
     	assertEquals(text,returnValue);
 	}
 	public void testXHRAsLink() throws Exception{
@@ -405,7 +404,7 @@ public class ExternalBrowserExtractorHtmlTest extends StringExtractorTestBase {
     	extractor.setReturnValue(content);
     	
         //extractor.process(euri);
-        String execString = extractor.generateExecutionString(euri,content,"","", false);
+        String execString = extractor.generateExecutionString(euri,content,"", false);
         extractor.cleanupTempFiles();
         assertTrue(execString.startsWith("node myScript.js --url \"http://www.archive.org/start/\" --userAgent \"userAgent\" --preload "));
         String jsonText = execString.substring(execString.indexOf("--preload ")+10).trim().replace("\\", "");
@@ -460,7 +459,7 @@ class MockExternalBrowserExtractorHtml extends ExternalBrowserExtractorHtml{
 	public void setReturnValue(String returnValue) { returnVal = returnValue; };
 	
 	@Override
-	protected String executeCommand(String executionString, File tempOutFile){
+	protected String executeCommand(String executionString){
 		return returnVal;
 	}
 

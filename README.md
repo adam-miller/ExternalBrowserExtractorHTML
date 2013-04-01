@@ -13,7 +13,7 @@ Configuration crawler-beans.cxml
 Define your extractor bean (You can put this near the settings for the other extractors: extractorHTML, extractorCSS, etc). The optional proxy mode configuration is shown below:
 
     <bean id="browserExtractorHtml" class="org.archive.modules.extractor.ExternalBrowserExtractorHtml" >
-      <property name="executionString" value="nice -n4 /phantomjs/phantomjs-1.6.1-linux-i686-dynamic/bin/phantomjs --proxy=127.0.0.1:3128 /phantomjs/phantomBrowserExtractor/phantomBrowserExtractor.js --userAgent _USERAGENT_ --url _URI_ > _OUTPUTFILEPATH_ 2>/dev/null"/>
+      <property name="executionString" value="nice -n4 /phantomjs/phantomjs-1.6.1-linux-i686-dynamic/bin/phantomjs --proxy=127.0.0.1:3128 /phantomjs/phantomBrowserExtractor/phantomBrowserExtractor.js --userAgent _USERAGENT_ --url _URI_ 2>/dev/null"/>
       <property name="shouldBrowserReload" value="True" />
       <property name="commandTimeout" value="30000" />
       <!-- <property name="treatFramesAsEmbedLinks" value="true" /> -->

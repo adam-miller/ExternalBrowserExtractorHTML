@@ -14,6 +14,25 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
+  <repositories>
+    <repository>
+      <id>internetarchive</id>
+      <name>Internet Archive Maven Repository</name>
+      <url>http://builds.archive.org:8080/maven2</url>
+      <layout>default</layout>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>daily</updatePolicy>
+        <checksumPolicy>warn</checksumPolicy>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>daily</updatePolicy>
+        <checksumPolicy>warn</checksumPolicy>
+      </snapshots>
+    </repository>
+  </repositories>
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -50,18 +69,31 @@
     <dependency>
       <groupId>org.archive.heritrix</groupId>
       <artifactId>heritrix-engine</artifactId>
-      <version>3.1.1-SNAPSHOT</version>
+      <version>3.1.2-SNAPSHOT</version>
       <!-- scope>compile</scope -->
     </dependency>
     <dependency>
       <groupId>org.archive.heritrix</groupId>
       <artifactId>heritrix-commons</artifactId>
-      <version>3.1.1-SNAPSHOT</version>
+      <version>3.1.2-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.archive.heritrix</groupId>
       <artifactId>heritrix-modules</artifactId>
-      <version>3.1.1-SNAPSHOT</version>
+      <version>3.1.2-SNAPSHOT</version>
     </dependency>
   </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+	<groupId>org.apache.maven.plugins</groupId>
+	<artifactId>maven-compiler-plugin</artifactId>
+	<configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+	  </configuration>
+	<version>2.3.2</version>
+      </plugin>
+    </plugins>
+  </build>
 </project>

@@ -134,6 +134,19 @@ public class ExternalBrowserExtractorHtml extends ExtractorHTML implements Initi
     public void setExecutionString(String executionString) {
         kp.put("executionString",executionString);
     }
+    
+    /**
+     * The command line string to execute
+     */
+    {
+    	setSilenceOutputWarnings(false);
+    }
+    public boolean getSilenceOutputWarnings() {
+        return (Boolean) kp.get("silenceOutputWarnings");
+    }
+    public void setSilenceOutputWarnings(boolean silenceOutputWarnings) {
+        kp.put("silenceOutputWarnings",silenceOutputWarnings);
+    }
          
     public UserAgentProvider getUserAgentProvider() {
         return (UserAgentProvider) kp.get("userAgentProvider");
@@ -190,7 +203,6 @@ public class ExternalBrowserExtractorHtml extends ExtractorHTML implements Initi
 		
 		String returnValue="";
 		File tempInputFile = null;
-		File tempOutputFile = null;
 		try{
 			int sn;
 			Thread thread = Thread.currentThread();
@@ -201,7 +213,6 @@ public class ExternalBrowserExtractorHtml extends ExtractorHTML implements Initi
 			}
 			String tempPrefix = "tt-"+sn+"-"+System.identityHashCode(curi);
 			tempInputFile = File.createTempFile(tempPrefix, "tmp.html");
-			tempOutputFile = File.createTempFile(tempPrefix, "tmp_out.json");
 			
 			boolean shouldReload = getShouldBrowserReload();
 			if(!shouldReload){ //if preload is set, write to temp file.
@@ -217,9 +228,9 @@ public class ExternalBrowserExtractorHtml extends ExtractorHTML implements Initi
 		            IOUtils.closeQuietly(outStream); 
 		        }
 			}
-			String fullExecString = generateExecutionString(curi,cs,tempInputFile.getCanonicalPath(), tempOutputFile.getCanonicalPath(),shouldReload);
+			String fullExecString = generateExecutionString(curi,cs,tempInputFile.getCanonicalPath(),shouldReload);
 			
-			returnValue = executeCommand(fullExecString,tempOutputFile);
+			returnValue = executeCommand(fullExecString);
 
 			
 		} catch (IOException e) {
@@ -227,13 +238,8 @@ public class ExternalBrowserExtractorHtml extends ExtractorHTML implements Initi
 			return;
 		}
 		finally {
-			//TODO should probably not extract error pages by default
-
 			if(tempInputFile!=null)
-				FileUtils.deleteSoonerOrLater(tempInputFile);
-			if(tempOutputFile!=null)
-				FileUtils.deleteSoonerOrLater(tempOutputFile);
-			
+				FileUtils.deleteSoonerOrLater(tempInputFile);			
 			
 		}
 		innerExtract(curi,cs,returnValue);
@@ -245,6 +251,7 @@ public class ExternalBrowserExtractorHtml extends ExtractorHTML implements Initi
 			boolean extractValueAttributes = getExtractValueAttributes();
 			boolean extractOnlyFormGets = getExtractOnlyFormGets();
 			boolean XHRAsEmbeds=getTreatXHRAsEmbedLinks();
+			boolean silenceOutputWarnings = getSilenceOutputWarnings();
 			
 			Scanner scanner = new Scanner(jsonResults);
 			while (scanner.hasNextLine()) {
@@ -254,7 +261,8 @@ public class ExternalBrowserExtractorHtml extends ExtractorHTML implements Initi
 					json = new JSONObject(line);
 				}
 				catch(JSONException e) {
-					logger.log(Level.WARNING, "Error parsing JSON line - Skipping: "+line, e);
+					if(!silenceOutputWarnings)
+						logger.log(Level.WARNING, "Error parsing JSON line - Skipping: "+line, e);
 					continue;
 				}
 				try {
@@ -381,7 +389,7 @@ public class ExternalBrowserExtractorHtml extends ExtractorHTML implements Initi
 		if(this.getExtractJavascript()==false)
 			throw new UnsupportedOperationException("ExtractJavascript is not valid in this context");
 	}
-	protected String generateExecutionString(CrawlURI curi, CharSequence cs, String tempInputFilePath, String tempOutputFilePath, boolean shouldReload){
+	protected String generateExecutionString(CrawlURI curi, CharSequence cs, String tempInputFilePath, boolean shouldReload){
 		String userAgent = getUserAgent();
 		if(userAgent==null || userAgent.trim().length()==0)
 			userAgent=curi.getUserAgent();
@@ -398,7 +406,6 @@ public class ExternalBrowserExtractorHtml extends ExtractorHTML implements Initi
 			escapedUserAgent=getUserAgentProvider().getUserAgent().replace("\"", "\\\"");
 		
 		fullExecString = fullExecString.replace("_USERAGENT_","\""+escapedUserAgent+"\"");
-		fullExecString = fullExecString.replace("_OUTPUTFILEPATH_","\""+tempOutputFilePath.replace("\"", "\\\"")+"\"");
 		
 		if(!shouldReload){ // if we want to preload the content
 			JSONObject preloadObject = new JSONObject();
@@ -416,7 +423,7 @@ public class ExternalBrowserExtractorHtml extends ExtractorHTML implements Initi
 		
 		return fullExecString;
 	}
-    protected String executeCommand(String executionString, File tempOutputFile){
+    protected String executeCommand(String executionString){
 		String response = "";
 		
         if (logger.isLoggable(Level.FINEST)) {
@@ -427,6 +434,7 @@ public class ExternalBrowserExtractorHtml extends ExtractorHTML implements Initi
 		int shellExitStatus=0;
 		try {
 			final Process shell = pb.start();
+			final InputStream shellStream =shell.getInputStream();
 			
 			Callable<Integer> call = new Callable<Integer>(){
 				public Integer call() throws Exception {
@@ -434,9 +442,21 @@ public class ExternalBrowserExtractorHtml extends ExtractorHTML implements Initi
 					return shell.exitValue();
 				}
 			};
+			Callable<String> readOutput = new Callable<String>(){
+				public String call() throws Exception {
+					String output="";
+					String line="";
+					InputStreamReader isr= new InputStreamReader(shellStream);
+					BufferedReader reader = new BufferedReader(isr);
+					while ((line = reader.readLine()) != null)
+						output+=line+"\n";
+					return output;
+				}
+			};
 			ExecutorService service = Executors.newSingleThreadExecutor();
 			try{
 				Future<Integer> ft = service.submit(call);
+				Future<String> outputThread = service.submit(readOutput);
 				try{
 					shellExitStatus = ft.get(getCommandTimeout(),TimeUnit.MILLISECONDS);
 				} catch (TimeoutException ex) {
@@ -447,22 +467,15 @@ public class ExternalBrowserExtractorHtml extends ExtractorHTML implements Initi
 					shellExitStatus=-5;
 				}
 				
+				try{
+					response=outputThread.get(getCommandTimeout(),TimeUnit.MILLISECONDS);
+				} catch (Exception ex){
+					logger.log(Level.WARNING, "Error occured while reading command response.", ex);
+				}
+				
 			} finally{
 				service.shutdown();
 			}
-			
-	        InputStream inStream = null;
-	        
-	        try {
-	        	inStream = org.apache.commons.io.FileUtils.openInputStream(tempOutputFile);
-	        	response = IOUtils.toString(inStream);
-	        } 
-	        catch (IOException e) {
-    			logger.log(Level.WARNING, "Error occured while reading command response.", e);
-	        }
-	        finally {
-	            IOUtils.closeQuietly(inStream); 
-	        }
 	        
 		}
 		catch (IOException e) {
@@ -504,7 +517,5 @@ public class ExternalBrowserExtractorHtml extends ExtractorHTML implements Initi
 		else {
 			return "";
 		}
-	}
-	protected void cleanupTempFiles(){
 	}
 }
