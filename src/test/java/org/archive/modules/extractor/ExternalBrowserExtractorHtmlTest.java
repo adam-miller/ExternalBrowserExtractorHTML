@@ -405,7 +405,7 @@ public class ExternalBrowserExtractorHtmlTest extends StringExtractorTestBase {
     	
         //extractor.process(euri);
         String execString = extractor.generateExecutionString(euri,content,"", false);
-        extractor.cleanupTempFiles();
+        
         assertTrue(execString.startsWith("node myScript.js --url \"http://www.archive.org/start/\" --userAgent \"userAgent\" --preload "));
         String jsonText = execString.substring(execString.indexOf("--preload ")+10).trim().replace("\\", "");
         System.out.println(jsonText);
