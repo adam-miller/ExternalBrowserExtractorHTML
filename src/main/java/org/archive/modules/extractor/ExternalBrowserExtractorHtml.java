@@ -455,8 +455,8 @@ public class ExternalBrowserExtractorHtml extends ExtractorHTML implements Initi
 			};
 			ExecutorService service = Executors.newSingleThreadExecutor();
 			try{
-				Future<Integer> ft = service.submit(call);
 				Future<String> outputThread = service.submit(readOutput);
+				Future<Integer> ft = service.submit(call);
 				try{
 					shellExitStatus = ft.get(getCommandTimeout(),TimeUnit.MILLISECONDS);
 				} catch (TimeoutException ex) {
