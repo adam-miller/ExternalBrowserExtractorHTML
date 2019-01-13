@@ -28,7 +28,7 @@ Add it before the extractorHTML processor:
     <ref bean="browserExtractorHtml"/>
 
 
-When using a caching proxy like Squid with the browser, you will want to direct H3 to request the discovered items through the proxy. Create a sheet assocation with the configuration shown below. The ViaContextMatchesRegexDecide rule is included in this package:
+When using a caching proxy like Squid with the browser, you will want to direct H3 to request the discovered items through the proxy. Create a sheet association with the configuration shown below. The ViaContextMatchesRegexDecide rule is included in this package:
 
     <bean class='org.archive.crawler.spring.DecideRuledSheetAssociation'>
       <property name='rules'>
